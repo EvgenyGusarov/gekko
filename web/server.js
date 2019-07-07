@@ -106,13 +106,20 @@ router.post('/api/getCandles', require(ROUTE('getCandles')));
 //   ws.on('message', _.noop);
 // });
 
+const auth = require('http-auth');
+const basic = auth.basic({
+  realm: "Restricted",
+  file: __dirname + "/.htpasswd"
+});
+
 app
   .use(cors())
   .use(serve(WEBROOT + 'vue/dist'))
   .use(bodyParser())
   .use(require('koa-logger')())
   .use(router.routes())
-  .use(router.allowedMethods());
+  .use(router.allowedMethods())
+  .use(auth.koa(basic));
 
 server.timeout = config.api.timeout || 120000;
 server.on('request', app.callback());
