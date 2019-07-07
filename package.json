@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.js --recursive test -u tdd --reporter spec",
-    "start": "node ./gekko --config config.js --ui"
+    "start": "node ./gekko --ui",
+    "heroku-postbuild": "cd exchange && npm i"
   },
   "author": "Mike van Rossum <mike@mvr.me>",
   "dependencies": {
