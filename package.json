@@ -50,7 +50,7 @@
     "sinon": "^4.2.0"
   },
   "engines": {
-    "node": ">=8.11.2"
+    "node": "10.x"
   },
   "license": "MIT",
   "repository": {
