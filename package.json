@@ -12,6 +12,7 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.js --recursive test -u tdd --reporter spec",
     "start": "node ./gekko --ui",
+    "worker": "node gekko --config config_binance_eth_heroku.js",
     "heroku-postbuild": "cd exchange && npm i"
   },
   "author": "Mike van Rossum <mike@mvr.me>",
