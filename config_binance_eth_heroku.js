@@ -90,9 +90,9 @@ config.performanceAnalyzer = {
 // Enabling this will activate trades for the market being
 // watched by `config.watch`.
 config.trader = {
-  enabled: false,
-  key: '',
-  secret: '',
+  enabled: true,
+  key: process.env.BINANCE_API_KEY,
+  secret: process.env.BINANCE_API_SECRET,
   username: '', // your username, only required for specific exchanges.
   passphrase: '', // GDAX, requires a passphrase.
 }
@@ -286,7 +286,7 @@ config.backtestResultExporter = {
 //                       CONFIGURING ADAPTER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-config.adapter = 'sqlite';
+config.adapter = 'postgresql';
 
 config.sqlite = {
   path: 'plugins/sqlite',
@@ -534,6 +534,6 @@ config.custom_SMA = {
 // understand this.
 //
 // Not sure? Read this first: https://github.com/askmike/gekko/issues/201
-config['I understand that Gekko only automates MY OWN trading strategies'] = false;
+config['I understand that Gekko only automates MY OWN trading strategies'] = true;
 
 module.exports = config;
