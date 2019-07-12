@@ -32,49 +32,55 @@ const mode = util.gekkoMode();
 
 const connectionString = config.postgresql.connectionString;
 
-const checkClient = new pg.Pool({
-  connectionString: connectionString + '/postgres',
-});
 const pool = new pg.Pool({
   connectionString: connectionString + '/' + dbName,
 });
 
-// We need to check if the db exists first.
-// This requires connecting to the default
-// postgres database first. Your postgres
-// user will need appropriate rights.
-checkClient.connect((err, client, done) => {
-  if(err) {
-    util.die(err);
-  }
+if (!config.postgresql.databaseExists) {
+  // We need to check if the db exists first.
+  // This requires connecting to the default
+  // postgres database first. Your postgres
+  // user will need appropriate rights.
 
-  log.debug("Check database exists: " + dbName);
-  client.query("select count(*) from pg_catalog.pg_database where datname = $1", [dbName],
-    (err, res) => {
-      if(err) {
-        util.die(err);
-      }
+  const checkClient = new pg.Pool({
+    connectionString: connectionString + '/postgres',
+  });
 
-      if(res.rows[0].count !== '0') {
-        // database exists
-        log.debug("Database exists: " + dbName);
-        log.debug("Postgres connection pool is ready, db " + dbName);
-        upsertTables();
-        done();
-        return;
-      }
 
-      // database dot NOT exist
+  checkClient.connect((err, client, done) => {
+    if(err) {
+      util.die(err);
+    }
 
-      if(mode === 'backtest') {
-        // no point in trying to backtest with
-        // non existing data.
-        util.die(`History does not exist for exchange ${config.watch.exchange}.`);
-      }
+    log.debug("Check database exists: " + dbName);
+    client.query("select count(*) from pg_catalog.pg_database where datname = $1", [dbName],
+      (err, res) => {
+        if(err) {
+          util.die(err);
+        }
 
-      createDatabase(client, done);
-    });
-});
+        if(res.rows[0].count !== '0') {
+          // database exists
+          log.debug("Database exists: " + dbName);
+          log.debug("Postgres connection pool is ready, db " + dbName);
+          upsertTables();
+          done();
+          return;
+        }
+
+        // database dot NOT exist
+
+        if(mode === 'backtest') {
+          // no point in trying to backtest with
+          // non existing data.
+          util.die(`History does not exist for exchange ${config.watch.exchange}.`);
+        }
+
+        createDatabase(client, done);
+      });
+  });
+}
+
 
 const createDatabase = (client, done) => {
   client.query("CREATE DATABASE " + dbName, err => {

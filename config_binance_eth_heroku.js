@@ -311,6 +311,7 @@ config.postgresql = {
   connectionString: connectionString,
   database: database,
   schema: 'public',
+  databaseExists: true,
   dependencies: [{
     module: 'pg',
     version: '7.4.3'
@@ -355,8 +356,8 @@ config.adviceLogger = {
 config.importer = {
   daterange: {
     // NOTE: these dates are in UTC
-    from: "2017-11-01 00:00:00",
-    to: "2017-11-20 00:00:00"
+    from: "2019-07-11 07:00:00",
+    to: "2019-07-12 09:14:00"
   }
 }
 
