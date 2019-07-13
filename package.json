@@ -11,9 +11,9 @@
   ],
   "scripts": {
     "test": "./node_modules/.bin/mocha test/*.js --recursive test -u tdd --reporter spec",
-    "start": "node ./gekko --ui",
-    "worker": "node gekko --config config_binance_eth_heroku.js",
-    "heroku-postbuild": "cd exchange && npm i"
+    "start": "node ./gekko --ui --config config_binance_eth_heroku.js",
+    "worker": "node gekko -c config_binance_eth_heroku.js",
+    "heroku-postbuild": "cd exchange && npm i && cd - && node ./pg_migrate -c config_binance_eth_heroku.js"
   },
   "author": "Mike van Rossum <mike@mvr.me>",
   "dependencies": {
