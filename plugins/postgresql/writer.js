@@ -14,9 +14,10 @@ var Store = function(done, pluginMeta) {
   done();
 }
 
-Store.prototype.writeCandles = function() {
+Store.prototype.writeCandles = function(next) {
+  console.log('writeCandles', this.cache);
   if(_.isEmpty(this.cache)){
-    return;
+    return next();
   }
 
   //log.debug('Writing candles to DB!');
@@ -44,6 +45,7 @@ Store.prototype.writeCandles = function() {
         } else {
           //log.debug(res)
         }
+        next();
       });
     });
   });
@@ -54,15 +56,17 @@ Store.prototype.writeCandles = function() {
 var processCandle = function(candle, done) {
   this.cache.push(candle);
   if (this.cache.length > 1)
-    this.writeCandles();
-
-  done();
+    this.writeCandles(done);
+  else
+    done();
 };
 
 var finalize = function(done) {
-  this.writeCandles();
-  this.db = null;
-  done();
+  console.log('finalize');
+  this.writeCandles(() => {
+    this.db = null;
+    done();
+  });
 }
 
 if(config.candleWriter.enabled) {
