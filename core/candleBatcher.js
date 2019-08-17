@@ -11,14 +11,22 @@
 
 var _ = require('lodash');
 var util = require(__dirname + '/util');
+const log = require(dirs.core + '/log');
 
-var CandleBatcher = function(candleSize) {
+var CandleBatcher = function(candleSize, justify) {
   if(!_.isNumber(candleSize))
     throw new Error('candleSize is not a number');
 
   this.candleSize = candleSize;
   this.smallCandles = [];
   this.calculatedCandles = [];
+  this.justify = Boolean(justify);
+
+  if (this.justify && 60 % this.candleSize !== 0) {
+    util.die(`Candle size must be divisor of 60 to justify candles`);
+  }
+
+  this.start = null;
 
   _.bindAll(this);
 }
@@ -30,11 +38,21 @@ CandleBatcher.prototype.write = function(candles) {
     throw new Error('candles is not an array');
   }
 
+  if (!this.start) {
+    this.start = this.justify ? this.justifyTime(candles[0].start) : candles[0].start;
+    let momentStart = moment.utc(start);
+    log.info(`Batcher will batch minute candles starting from ${momentStart.format('YYYY-MM-DD HH:mm:ss')}`);
+  }
+
   this.emitted = 0;
 
   _.each(candles, function(candle) {
-    this.smallCandles.push(candle);
-    this.check();
+    if (candle.start >= this.start) {
+      this.smallCandles.push(candle);
+      this.check();
+    } else {
+      log.warn('Batcher is skipping minute candle');
+    }
   }, this);
 
   return this.emitted;
@@ -56,6 +74,12 @@ CandleBatcher.prototype.flush = function() {
   );
 
   this.calculatedCandles = [];
+}
+
+CandleBatcher.prototype.justifyTime = function (m) {
+  let hourStart = m.clone().startOf('hour');
+  const hourOffset = m.diff(hourStart, 'm');
+  return hourStart.add(Math.ceil(hourOffset / this.candleSize) * this.candleSize, 'm');
 }
 
 CandleBatcher.prototype.calculate = function() {
